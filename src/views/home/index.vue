@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <router-view/>
+  <div class="home">
+    首页
   </div>
 </template>
 
@@ -8,15 +8,11 @@
 import Vue from 'vue'
 
 export default Vue.extend({
-  name: 'App',
+  name: 'HomeIndex',
   components: {}
 })
 </script>
 
-<style lang="scss">
-//@import "~@/styles/variables.scss";
+<style lang="scss" scoped>
 
-.text {
-  color: $success-color;
-}
 </style>
