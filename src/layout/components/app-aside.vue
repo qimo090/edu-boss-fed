@@ -4,7 +4,8 @@
     class="el-menu-vertical"
     @open="handleOpen"
     @close="handleClose"
-    active-text-color="#f40"
+    :collapse="isCollapse"
+    active-text-color="#409EFF"
     router
   >
     <el-submenu index="1">
@@ -55,6 +56,12 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'AppAside',
+  props: {
+    isCollapse: {
+      type: Boolean,
+      default: false
+    }
+  },
   methods: {
     handleOpen (key: string, keyPath: string): void {
       console.log(key, keyPath)
@@ -67,7 +74,15 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.el-menu {
+  background-color: $sidebar-bg;
+}
+
 .el-menu-vertical {
   min-height: 100vh;
+}
+
+.el-menu:not(.el-menu--collapse) {
+  width: 200px;
 }
 </style>

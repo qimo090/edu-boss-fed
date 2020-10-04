@@ -1,11 +1,14 @@
 <template>
   <div class="header">
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-      <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-      <el-breadcrumb-item>活动详情</el-breadcrumb-item>
-    </el-breadcrumb>
+    <div class="header-left">
+      <el-button type="text" class="hamburger" @click="oChangeCollapse">
+        <i :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold' "/>
+      </el-button>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ $route.meta.title || '' }}</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
     <el-dropdown>
       <span class="el-dropdown-link">
         <el-avatar
@@ -29,6 +32,12 @@ import { getUserInfo } from '@/services/user'
 
 export default Vue.extend({
   name: 'app-header',
+  props: {
+    isCollapse: {
+      type: Boolean,
+      default: false
+    }
+  },
   data () {
     return {
       userInfo: {
@@ -65,6 +74,9 @@ export default Vue.extend({
           message: '取消退出'
         })
       })
+    },
+    oChangeCollapse () {
+      this.$emit('update:isCollapse', !this.isCollapse)
     }
   }
 })
@@ -77,5 +89,18 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+
+    .hamburger {
+      margin-right: 10px;
+      padding: 15px 15px 15px 0;
+      font-size: 20px;
+      border: 0;
+      border-radius: 0;
+    }
+  }
 }
 </style>

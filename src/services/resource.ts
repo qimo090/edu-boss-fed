@@ -32,4 +32,19 @@ export const getResourcePages = (data: Resource) => {
   })
 }
 
-// 获取资源分类
+// 创建或编辑资源
+export const createOrUpdateResource = (data: any) => {
+  return request({
+    method: 'POST',
+    url: '/boss/resource/saveOrUpdate',
+    data
+  })
+}
+
+// 删除资源
+export const deleteResource = (id: number) => {
+  return request({
+    method: 'DELETE',
+    url: `/boss/resource/${id}`
+  })
+}

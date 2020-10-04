@@ -1,17 +1,18 @@
 <template>
-  <el-card class="resource-list">
-    <div slot="header">
-      <el-form ref="form" :model="form" label-width="80px">
+  <div class="resource-list">
+    <el-card shadow="never">
+      <el-form ref="form" inline :model="form" label-width="80px" size="mini">
         <el-form-item prop="name" label="资源名称">
-          <el-input v-model="form.name"></el-input>
+          <el-input size="small" v-model="form.name" placeholder="请输入资源名称"/>
         </el-form-item>
         <el-form-item prop="url" label="资源路径">
-          <el-input v-model="form.url"></el-input>
+          <el-input size="small" v-model="form.url" placeholder="请输入资源路径"/>
         </el-form-item>
         <el-form-item prop="categoryId" label="资源分类">
           <el-select
+            size="small"
             v-model="form.categoryId"
-            placeholder="请选择资源分类"
+            placeholder="全部"
             clearable
           >
             <el-option
@@ -24,28 +25,38 @@
         </el-form-item>
         <el-form-item>
           <el-button
+            size="small"
             type="primary"
             @click="onSubmit"
             :disabled="isLoading"
           >查询搜索
           </el-button>
           <el-button
+            size="small"
             @click="onReset"
             :disabled="isLoading"
           >重置
           </el-button>
         </el-form-item>
       </el-form>
-    </div>
+    </el-card>
+    <el-card shadow="never">
+      <el-button size="small" @click="handleCreate">添加</el-button>
+      <el-button size="small" @click="$router.push({ name: 'resource-category' })">资源分类</el-button>
+    </el-card>
     <el-table
       :data="resources"
+      stripe
+      border
       style="width: 100%; margin-bottom: 20px"
       v-loading="isLoading"
     >
       <el-table-column
-        type="index"
+        prop="id"
         label="编号"
-        width="100">
+        width="100"
+        align="center"
+      >
       </el-table-column>
       <el-table-column
         prop="name"
@@ -54,7 +65,7 @@
       </el-table-column>
       <el-table-column
         prop="url"
-        width="180"
+        width="250"
         label="资源路径">
       </el-table-column>
       <el-table-column
@@ -65,10 +76,11 @@
       <el-table-column
         width="180"
         prop="createdTime"
+        :formatter="row => new Date(row.createdTime).toLocaleString()"
         label="添加时间">
       </el-table-column>
       <el-table-column
-        width="180"
+        min-width="180"
         label="操作">
         <template slot-scope="scope">
           <el-button
@@ -94,12 +106,54 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
-  </el-card>
+
+    <!-- create/update -->
+    <el-dialog
+      width="500px"
+      :visible.sync="modifyVisible"
+      :title="isEdit ? '编辑资源' : '添加资源'"
+      class="dialog-form"
+    >
+      <el-form ref="modifyForm" :rules="modifyRules" :model="modifyForm" label-width="120px">
+        <el-form-item label="资源名称" prop="name">
+          <el-input size="small" v-model="modifyForm.name" placeholder="请输入资源名称"/>
+        </el-form-item>
+        <el-form-item label="资源路径" prop="url">
+          <el-input size="small" v-model="modifyForm.url" placeholder="请输入资源路径"/>
+        </el-form-item>
+        <el-form-item label="资源分类" prop="categoryId">
+          <el-select
+            size="small"
+            v-model="modifyForm.categoryId"
+            placeholder="全部"
+            clearable
+          >
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in resourceCategories"
+              :key="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="描述" prop="description">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 6, maxRows: 6 }" size="small" v-model="modifyForm.description"
+            placeholder="请输入资源描述"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button type="primary" @click="onModifySubmit">确定</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { getResourcePages } from '@/services/resource'
+import { createOrUpdateResource, deleteResource, getResourcePages } from '@/services/resource'
 import { getResourceCategories } from '@/services/resource-category'
 
 export default Vue.extend({
@@ -124,6 +178,39 @@ export default Vue.extend({
         size: 10,
         // 资源分类ID
         categoryId: null
+      },
+      // ===== create/update =====
+      // 判定是否是编辑
+      isEdit: false,
+      // 是否显示弹框
+      modifyVisible: false,
+      // 添加/修改 表单数据
+      modifyForm: {
+        // 资源唯一标识 创建时为null
+        id: null,
+        // 资源名称
+        name: '测试资源001',
+        // 资源路径
+        url: '/boss/course/lesson/001',
+        // 资源分类ID
+        categoryId: null,
+        // 描述
+        description: '测试'
+      },
+      // 添加/修改 规则
+      modifyRules: {
+        name: [
+          { required: true, message: '请输入资源名称', trigger: 'blur' }
+        ],
+        url: [
+          { required: true, message: '请输入资源路径', trigger: 'blur' }
+        ],
+        categoryId: [
+          // { required: true, message: '请选择资源分类', trigger: 'change' }
+        ],
+        description: [
+          { required: false, message: '请输入资源描述', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -148,15 +235,66 @@ export default Vue.extend({
         this.resourceCategories = data.data
       }
     },
+    // 查询
     onSubmit () {
       this.form.current = 1
       this.loadResources()
     },
-    handleEdit (item: any) {
-      console.log('handleEdit', item)
+    // 添加按钮事件
+    handleCreate () {
+      this.modifyVisible = true
+      this.isEdit = false
     },
+    // 添加表单提交
+    async onModifySubmit () {
+      this.isLoading = true
+      try {
+        // 表单验证
+        await (this.$refs.modifyForm as Form).validate
+        // 发起请求
+        const { data } = await createOrUpdateResource(this.modifyForm)
+        // 请求响应校验
+        if (data.code === '000000') {
+          this.$message.success('提交成功')
+          // 关闭弹框
+          this.modifyVisible = false
+          // 重载表格
+          await this.loadResources()
+          // 重置表单
+          await (this.$refs.modifyForm as Form).resetFields()
+        } else {
+          this.$message.error(data.message)
+        }
+      } catch (err) {
+        console.log('提交失败', err)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    // 编辑按钮事件
+    handleEdit (item: any) {
+      // 弹框
+      this.modifyVisible = true
+      // 区分出创建还是编辑
+      this.isEdit = true
+      // 表单数据回填
+      this.modifyForm = { ...item }
+    },
+    // 删除按钮事件
     handleDelete (item: any) {
-      console.log('handleDelete', item)
+      this.$confirm('确认删除吗？', '删除提示', {})
+        .then(async () => {
+          // 请求删除操作
+          const { data } = await deleteResource(item.id)
+          if (data.code === '000000') {
+            this.$message.success('删除成功')
+            await this.loadResources() // 更新数据列表
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message.info('已取消删除')
+        })
     },
     handleSizeChange (val: number) {
       this.form.size = val
@@ -178,5 +316,9 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-
+.dialog-form {
+  .el-input, .el-select, .el-textarea {
+    width: 250px;
+  }
+}
 </style>

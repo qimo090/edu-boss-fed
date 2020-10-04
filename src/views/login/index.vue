@@ -48,7 +48,6 @@ export default Vue.extend({
         await (this.$refs.form as Form).validate()
         // 2. 验证通过 => 提交表单
         const { data } = await login(this.form)
-        console.log(data)
         // 3. 处理请求结果
         //    失败 => 提示
         if (data.state !== 1) {
