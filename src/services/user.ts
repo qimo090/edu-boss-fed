@@ -24,3 +24,12 @@ export const getUserInfo = () => {
     url: '/front/user/getInfo'
   })
 }
+
+// 用户管理
+export const getUsers = (data: any) => {
+  return request({
+    method: 'POST',
+    url: '/boss/user/getUserPages',
+    data
+  })
+}

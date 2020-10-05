@@ -51,37 +51,14 @@
       style="width: 100%; margin-bottom: 20px"
       v-loading="isLoading"
     >
-      <el-table-column
-        prop="id"
-        label="编号"
-        width="100"
-        align="center"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="资源名称"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="url"
-        width="250"
-        label="资源路径">
-      </el-table-column>
-      <el-table-column
-        prop="description"
-        width="180"
-        label="描述">
-      </el-table-column>
-      <el-table-column
-        width="180"
-        prop="createdTime"
-        :formatter="row => new Date(row.createdTime).toLocaleString()"
-        label="添加时间">
-      </el-table-column>
-      <el-table-column
-        min-width="180"
-        label="操作">
+      <el-table-column prop="id" label="编号" width="100" align="center"/>
+      <el-table-column prop="name" label="资源名称" width="180"/>
+      <el-table-column prop="url" width="250" label="资源路径"/>
+      <el-table-column prop="description" width="180" label="描述"/>
+      <el-table-column width="180" prop="createdTime"
+                       :formatter="row => new Date(row.createdTime).toLocaleString()"
+                       label="添加时间"/>
+      <el-table-column min-width="180" label="操作">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -162,7 +139,7 @@ export default Vue.extend({
     return {
       // 资源列表
       resources: [],
-      // 表单加载loading
+      // loading
       isLoading: true,
       // 资源分类列表
       resourceCategories: [],
@@ -230,7 +207,6 @@ export default Vue.extend({
     },
     async loadResourcesCategories () {
       const { data } = await getResourceCategories()
-      console.log(data)
       if (data.code === '000000') {
         this.resourceCategories = data.data
       }
